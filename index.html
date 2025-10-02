@@ -89,6 +89,26 @@
             font-size: 1.8rem;
         }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .language-selector {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .language-selector option {
+            background: var(--primary-color);
+            color: white;
+        }
+
         nav ul {
             display: flex;
             list-style: none;
@@ -541,6 +561,12 @@
             .chart-filters {
                 flex-wrap: wrap;
             }
+            
+            .header-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-end;
+            }
         }
 
         /* Animations */
@@ -577,6 +603,30 @@
         .prayer-location i {
             font-size: 0.9rem;
         }
+
+        /* Barre de progression */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -587,20 +637,25 @@
                     <i class="fas fa-mosque"></i>
                     <span>ركعات</span>
                 </div>
-                <nav>
-                    <button class="mobile-menu-btn">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <ul>
-                        <li><a href="#" class="active" data-tab="dashboard">Tableau de bord</a></li>
-                        <li><a href="#" data-tab="prayers">Prières</a></li>
-                        <li><a href="#" data-tab="statistics">Statistiques</a></li>
-                        <li><a href="#" data-tab="fasting">Jeûne</a></li>
-                        <li><a href="#" data-tab="quran">Coran</a></li>
-                        <li><a href="#" data-tab="dhikr">Dhikr</a></li>
-                        <li><a href="#" data-tab="settings">Paramètres</a></li>
-                    </ul>
-                </nav>
+                <div class="header-controls">
+                    <select class="language-selector" id="language-selector">
+                        <option value="fr">Français</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                    <nav>
+                        <button class="mobile-menu-btn">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <ul>
+                            <li><a href="#" class="active" data-tab="dashboard">Tableau de bord</a></li>
+                            <li><a href="#" data-tab="statistics">Statistiques</a></li>
+                            <li><a href="#" data-tab="fasting">Jeûne</a></li>
+                            <li><a href="#" data-tab="quran">Coran</a></li>
+                            <li><a href="#" data-tab="dhikr">Dhikr</a></li>
+                            <li><a href="#" data-tab="settings">Paramètres</a></li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </header>
@@ -610,7 +665,6 @@
             <div class="main-content">
                 <div class="tabs">
                     <div class="tab active" data-tab="dashboard">Tableau de bord</div>
-                    <div class="tab" data-tab="prayers">Prières</div>
                     <div class="tab" data-tab="statistics">Statistiques</div>
                     <div class="tab" data-tab="fasting">Jeûne</div>
                     <div class="tab" data-tab="quran">Coran</div>
@@ -654,18 +708,6 @@
                                 <div class="stat-value" id="dhikr-count">0</div>
                                 <div class="stat-label">Dhikr aujourd'hui</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section Prières -->
-                <div id="prayers" class="tab-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2 class="card-title">Historique des prières</h2>
-                        </div>
-                        <div id="prayer-history">
-                            <!-- L'historique sera généré par JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -798,15 +840,6 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Prochaines prières</h2>
-                    </div>
-                    <div id="next-prayers">
-                        <!-- Les prochaines prières seront générées par JavaScript -->
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
                         <h2 class="card-title">Objectifs du jour</h2>
                     </div>
                     <div id="daily-goals">
@@ -874,18 +907,145 @@
                     prayer: true,
                     fasting: false
                 },
-                location: "Paris, France"
+                location: "Paris, France",
+                language: "fr"
             },
             statistics: {
-                week: [5, 4, 5, 3, 5, 4, 5],
-                month: Array(30).fill(0).map(() => Math.floor(Math.random() * 6)),
-                year: Array(12).fill(0).map(() => Math.floor(Math.random() * 150) + 50)
+                // Données de test pour les statistiques
+                week: {
+                    dates: ['Lun 9', 'Mar 10', 'Mer 11', 'Jeu 12', 'Ven 13', 'Sam 14', 'Dim 15'],
+                    home: [2, 3, 1, 4, 2, 3, 1],
+                    mosque: [3, 2, 4, 1, 3, 2, 4]
+                },
+                month: {
+                    dates: Array.from({length: 30}, (_, i) => `${i+1} Oct`),
+                    home: Array(30).fill(0).map(() => Math.floor(Math.random() * 5)),
+                    mosque: Array(30).fill(0).map(() => Math.floor(Math.random() * 5))
+                },
+                year: {
+                    dates: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                    home: Array(12).fill(0).map(() => Math.floor(Math.random() * 100) + 50),
+                    mosque: Array(12).fill(0).map(() => Math.floor(Math.random() * 100) + 50)
+                }
+            }
+        };
+
+        // Textes multilingues
+        const translations = {
+            fr: {
+                appName: "ركعات",
+                dashboard: "Tableau de bord",
+                statistics: "Statistiques",
+                fasting: "Jeûne",
+                quran: "Coran",
+                dhikr: "Dhikr",
+                settings: "Paramètres",
+                today: "Aujourd'hui",
+                weekStats: "Statistiques de la semaine",
+                prayerCount: "Prières aujourd'hui",
+                fastingCount: "Jours de jeûne",
+                quranProgress: "Progression Coran",
+                dhikrCount: "Dhikr aujourd'hui",
+                prayerStats: "Statistiques des prières",
+                week: "Semaine",
+                month: "Mois",
+                year: "Année",
+                fastingToday: "Jeûne aujourd'hui",
+                fastingTotal: "Jours jeûnés ce mois",
+                fastingTracking: "Suivi du jeûne",
+                readingProgress: "Progression de lecture",
+                addPages: "Ajouter des pages lues aujourd'hui",
+                add: "Ajouter",
+                dailyDhikr: "Dhikr du jour",
+                appSettings: "Paramètres de l'application",
+                theme: "Thème",
+                light: "Clair",
+                dark: "Sombre",
+                gold: "Or",
+                notifications: "Notifications",
+                prayerReminders: "Rappels de prières",
+                fastingReminders: "Rappels de jeûne",
+                location: "Localisation",
+                save: "Enregistrer",
+                characterMessage: "Bonjour! N'oubliez pas vos prières aujourd'hui.",
+                dailyGoals: "Objectifs du jour",
+                fivePrayers: "5 prières",
+                quranReading: "Lecture du Coran",
+                dhikrGoal: "Dhikr",
+                voluntaryFasting: "Jeûne surérogatoire",
+                accomplished: "Accomplie",
+                pending: "En attente",
+                mark: "Marquer",
+                cancel: "Annuler",
+                mosque: "Mosquée",
+                home: "Maison",
+                wherePrayed: "Où avez-vous prié ?",
+                atMosque: "À la mosquée",
+                atHome: "À la maison",
+                prayersAccomplished: "Prières accomplies",
+                homePrayers: "Prière à la maison",
+                mosquePrayers: "Prière à la mosquée"
+            },
+            ar: {
+                appName: "ركعات",
+                dashboard: "لوحة التحكم",
+                statistics: "الإحصائيات",
+                fasting: "الصيام",
+                quran: "القرآن",
+                dhikr: "الذكر",
+                settings: "الإعدادات",
+                today: "اليوم",
+                weekStats: "إحصائيات الأسبوع",
+                prayerCount: "الصلوات اليوم",
+                fastingCount: "أيام الصيام",
+                quranProgress: "تقدم القرآن",
+                dhikrCount: "الذكر اليوم",
+                prayerStats: "إحصائيات الصلوات",
+                week: "أسبوع",
+                month: "شهر",
+                year: "سنة",
+                fastingToday: "صيام اليوم",
+                fastingTotal: "أيام الصيام هذا الشهر",
+                fastingTracking: "متابعة الصيام",
+                readingProgress: "تقدم القراءة",
+                addPages: "إضافة الصفحات المقروءة اليوم",
+                add: "إضافة",
+                dailyDhikr: "ذكر اليوم",
+                appSettings: "إعدادات التطبيق",
+                theme: "السمة",
+                light: "فاتح",
+                dark: "داكن",
+                gold: "ذهبي",
+                notifications: "الإشعارات",
+                prayerReminders: "تذكير بالصلوات",
+                fastingReminders: "تذكير بالصيام",
+                location: "الموقع",
+                save: "حفظ",
+                characterMessage: "مرحباً! لا تنسى صلواتك اليوم.",
+                dailyGoals: "أهداف اليوم",
+                fivePrayers: "5 صلوات",
+                quranReading: "قراءة القرآن",
+                dhikrGoal: "الذكر",
+                voluntaryFasting: "صيام التطوع",
+                accomplished: "مؤداة",
+                pending: "في الانتظار",
+                mark: "تعليم",
+                cancel: "إلغاء",
+                mosque: "المسجد",
+                home: "البيت",
+                wherePrayed: "أين صليت؟",
+                atMosque: "في المسجد",
+                atHome: "في البيت",
+                prayersAccomplished: "الصلوات المؤداة",
+                homePrayers: "الصلاة في البيت",
+                mosquePrayers: "الصلاة في المسجد"
             }
         };
 
         // Variables globales
         let currentPrayerId = null;
         let prayerChart = null;
+        let currentLanguage = "fr";
 
         // Initialisation de l'application
         document.addEventListener('DOMContentLoaded', function() {
@@ -901,6 +1061,8 @@
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
                 Object.assign(appData, parsedData);
+                currentLanguage = appData.settings.language || "fr";
+                document.getElementById('language-selector').value = currentLanguage;
             }
         }
 
@@ -917,12 +1079,6 @@
             // Générer les cartes de prières
             generatePrayerCards();
             
-            // Générer l'historique des prières
-            generatePrayerHistory();
-            
-            // Générer les prochaines prières
-            generateNextPrayers();
-            
             // Générer les objectifs du jour
             generateDailyGoals();
             
@@ -934,6 +1090,9 @@
             
             // Appliquer le thème sauvegardé
             applyTheme(appData.settings.theme);
+            
+            // Appliquer la langue
+            applyLanguage(currentLanguage);
         }
 
         // Mettre à jour l'interface utilisateur
@@ -944,7 +1103,7 @@
             
             // Mettre à jour le compteur de jeûne
             document.getElementById('fasting-count').textContent = appData.fasting.total;
-            document.getElementById('fasting-today').textContent = appData.fasting.today ? "Oui" : "Non";
+            document.getElementById('fasting-today').textContent = appData.fasting.today ? translations[currentLanguage].yes : translations[currentLanguage].no;
             document.getElementById('fasting-total').textContent = appData.fasting.total;
             
             // Mettre à jour la progression du Coran
@@ -1020,7 +1179,7 @@
                 let locationHtml = '';
                 if (prayer.prayed && prayer.location) {
                     const locationIcon = prayer.location === 'mosque' ? 'fa-mosque' : 'fa-home';
-                    const locationText = prayer.location === 'mosque' ? 'Mosquée' : 'Maison';
+                    const locationText = prayer.location === 'mosque' ? translations[currentLanguage].mosque : translations[currentLanguage].home;
                     locationHtml = `
                         <div class="prayer-location">
                             <i class="fas ${locationIcon}"></i>
@@ -1033,76 +1192,15 @@
                     <div class="prayer-name">${prayer.name}</div>
                     <div class="prayer-time">${prayer.time}</div>
                     <div class="prayer-status ${prayer.prayed ? 'prayed' : ''}">
-                        ${prayer.prayed ? 'Accomplie' : 'En attente'}
+                        ${prayer.prayed ? translations[currentLanguage].accomplished : translations[currentLanguage].pending}
                     </div>
                     ${locationHtml}
                     <button class="prayer-action" data-prayer-id="${prayer.id}">
-                        ${prayer.prayed ? 'Annuler' : 'Marquer'}
+                        ${prayer.prayed ? translations[currentLanguage].cancel : translations[currentLanguage].mark}
                     </button>
                 `;
                 prayerGrid.appendChild(card);
             });
-        }
-
-        // Générer l'historique des prières
-        function generatePrayerHistory() {
-            const historyContainer = document.getElementById('prayer-history');
-            historyContainer.innerHTML = '<p>Historique des 7 derniers jours</p>';
-            
-            // Simulation d'historique (dans une vraie app, ces données viendraient du stockage)
-            const historyData = [
-                { date: '14/10/2023', prayers: [true, true, true, true, true] },
-                { date: '13/10/2023', prayers: [true, true, true, false, true] },
-                { date: '12/10/2023', prayers: [true, true, false, true, true] },
-                { date: '11/10/2023', prayers: [true, true, true, true, true] },
-                { date: '10/10/2023', prayers: [true, false, true, true, true] },
-                { date: '09/10/2023', prayers: [true, true, true, true, false] },
-                { date: '08/10/2023', prayers: [true, true, true, true, true] }
-            ];
-            
-            historyData.forEach(day => {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'history-day';
-                dayElement.innerHTML = `
-                    <div>${day.date}</div>
-                    <div>${day.prayers.filter(p => p).length}/5 prières</div>
-                `;
-                historyContainer.appendChild(dayElement);
-            });
-        }
-
-        // Générer les prochaines prières
-        function generateNextPrayers() {
-            const nextPrayersContainer = document.getElementById('next-prayers');
-            nextPrayersContainer.innerHTML = '';
-            
-            const now = new Date();
-            const currentTime = now.getHours() * 60 + now.getMinutes();
-            
-            // Trouver la prochaine prière
-            let nextPrayer = null;
-            for (const prayer of appData.prayers) {
-                const [hours, minutes] = prayer.time.split(':').map(Number);
-                const prayerTime = hours * 60 + minutes;
-                
-                if (prayerTime > currentTime && !prayer.prayed) {
-                    nextPrayer = prayer;
-                    break;
-                }
-            }
-            
-            // Si aucune prière n'est trouvée, prendre la première du lendemain
-            if (!nextPrayer) {
-                nextPrayer = appData.prayers[0];
-            }
-            
-            const nextElement = document.createElement('div');
-            nextElement.className = 'next-prayer';
-            nextElement.innerHTML = `
-                <div><strong>${nextPrayer.name}</strong></div>
-                <div>${nextPrayer.time}</div>
-            `;
-            nextPrayersContainer.appendChild(nextElement);
         }
 
         // Générer les objectifs du jour
@@ -1111,10 +1209,10 @@
             goalsContainer.innerHTML = '';
             
             const goals = [
-                { name: '5 prières', completed: appData.prayers.filter(p => p.prayed).length === 5 },
-                { name: 'Lecture du Coran', completed: appData.quran.pagesRead > 0 },
-                { name: 'Dhikr', completed: appData.dhikr.some(d => d.count > 0) },
-                { name: 'Jeûne surérogatoire', completed: appData.fasting.today }
+                { name: translations[currentLanguage].fivePrayers, completed: appData.prayers.filter(p => p.prayed).length === 5 },
+                { name: translations[currentLanguage].quranReading, completed: appData.quran.pagesRead > 0 },
+                { name: translations[currentLanguage].dhikrGoal, completed: appData.dhikr.some(d => d.count > 0) },
+                { name: translations[currentLanguage].voluntaryFasting, completed: appData.fasting.today }
             ];
             
             goals.forEach(goal => {
@@ -1153,22 +1251,34 @@
             const ctx = document.getElementById('prayerChart').getContext('2d');
             
             // Données par défaut (semaine)
-            const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-            const data = appData.statistics.week;
+            const labels = appData.statistics.week.dates;
+            const homeData = appData.statistics.week.home;
+            const mosqueData = appData.statistics.week.mosque;
             
             prayerChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Prières accomplies',
-                        data: data,
-                        borderColor: '#2e7d32',
-                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    datasets: [
+                        {
+                            label: translations[currentLanguage].homePrayers,
+                            data: homeData,
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: translations[currentLanguage].mosquePrayers,
+                            data: mosqueData,
+                            borderColor: '#d4af37',
+                            backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -1179,12 +1289,23 @@
                             max: 5,
                             ticks: {
                                 stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: translations[currentLanguage].prayersAccomplished
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Dates'
                             }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            position: 'top'
                         }
                     }
                 }
@@ -1193,28 +1314,32 @@
 
         // Mettre à jour le graphique selon la période sélectionnée
         function updateChart(period) {
-            let labels, data, max;
+            let labels, homeData, mosqueData, max;
             
             switch(period) {
                 case 'week':
-                    labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-                    data = appData.statistics.week;
+                    labels = appData.statistics.week.dates;
+                    homeData = appData.statistics.week.home;
+                    mosqueData = appData.statistics.week.mosque;
                     max = 5;
                     break;
                 case 'month':
-                    labels = Array(30).fill(0).map((_, i) => i + 1);
-                    data = appData.statistics.month;
+                    labels = appData.statistics.month.dates;
+                    homeData = appData.statistics.month.home;
+                    mosqueData = appData.statistics.month.mosque;
                     max = 5;
                     break;
                 case 'year':
-                    labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-                    data = appData.statistics.year;
+                    labels = appData.statistics.year.dates;
+                    homeData = appData.statistics.year.home;
+                    mosqueData = appData.statistics.year.mosque;
                     max = null;
                     break;
             }
             
             prayerChart.data.labels = labels;
-            prayerChart.data.datasets[0].data = data;
+            prayerChart.data.datasets[0].data = homeData;
+            prayerChart.data.datasets[1].data = mosqueData;
             prayerChart.options.scales.y.max = max;
             prayerChart.update();
         }
@@ -1226,7 +1351,7 @@
             
             let message = '';
             if (prayedCount === 0) {
-                message = "N'oubliez pas vos prières aujourd'hui!";
+                message = translations[currentLanguage].characterMessage;
             } else if (prayedCount < 3) {
                 message = "Continuez vos efforts!";
             } else if (prayedCount < 5) {
@@ -1252,6 +1377,101 @@
                     option.classList.add('active');
                 }
             });
+        }
+
+        // Appliquer la langue
+        function applyLanguage(lang) {
+            currentLanguage = lang;
+            appData.settings.language = lang;
+            saveData();
+            
+            // Mettre à jour les textes de l'interface
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Mettre à jour les titres des onglets
+            document.querySelectorAll('.tab').forEach((tab, index) => {
+                const keys = ['dashboard', 'statistics', 'fasting', 'quran', 'dhikr', 'settings'];
+                if (translations[lang][keys[index]]) {
+                    tab.textContent = translations[lang][keys[index]];
+                }
+            });
+            
+            // Mettre à jour les titres des cartes
+            document.querySelectorAll('.card-title').forEach(title => {
+                // Cette logique devrait être plus spécifique dans une application réelle
+                if (title.textContent.includes('Aujourd\'hui')) {
+                    title.textContent = translations[lang].today;
+                } else if (title.textContent.includes('Statistiques de la semaine')) {
+                    title.textContent = translations[lang].weekStats;
+                } else if (title.textContent.includes('Statistiques des prières')) {
+                    title.textContent = translations[lang].prayerStats;
+                } else if (title.textContent.includes('Suivi du jeûne')) {
+                    title.textContent = translations[lang].fastingTracking;
+                } else if (title.textContent.includes('Progression de lecture')) {
+                    title.textContent = translations[lang].readingProgress;
+                } else if (title.textContent.includes('Dhikr du jour')) {
+                    title.textContent = translations[lang].dailyDhikr;
+                } else if (title.textContent.includes('Paramètres de l\'application')) {
+                    title.textContent = translations[lang].appSettings;
+                } else if (title.textContent.includes('Objectifs du jour')) {
+                    title.textContent = translations[lang].dailyGoals;
+                }
+            });
+            
+            // Mettre à jour les étiquettes des statistiques
+            document.querySelectorAll('.stat-label').forEach(label => {
+                if (label.textContent.includes('Prières aujourd\'hui')) {
+                    label.textContent = translations[lang].prayerCount;
+                } else if (label.textContent.includes('Jours de jeûne')) {
+                    label.textContent = translations[lang].fastingCount;
+                } else if (label.textContent.includes('Progression Coran')) {
+                    label.textContent = translations[lang].quranProgress;
+                } else if (label.textContent.includes('Dhikr aujourd\'hui')) {
+                    label.textContent = translations[lang].dhikrCount;
+                } else if (label.textContent.includes('Jeûne aujourd\'hui')) {
+                    label.textContent = translations[lang].fastingToday;
+                } else if (label.textContent.includes('Jours jeûnés ce mois')) {
+                    label.textContent = translations[lang].fastingTotal;
+                }
+            });
+            
+            // Mettre à jour les boutons des filtres
+            document.querySelectorAll('.chart-filter').forEach((filter, index) => {
+                const keys = ['week', 'month', 'year'];
+                if (translations[lang][keys[index]]) {
+                    filter.textContent = translations[lang][keys[index]];
+                }
+            });
+            
+            // Mettre à jour le modal
+            const modalTitle = document.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = translations[lang].wherePrayed;
+            }
+            
+            const locationOptions = document.querySelectorAll('.location-option');
+            if (locationOptions.length >= 2) {
+                locationOptions[0].innerHTML = `<i class="fas fa-mosque"></i><span>${translations[lang].atMosque}</span>`;
+                locationOptions[1].innerHTML = `<i class="fas fa-home"></i><span>${translations[lang].atHome}</span>`;
+            }
+            
+            // Régénérer les composants qui dépendent de la langue
+            generatePrayerCards();
+            generateDailyGoals();
+            updateUI();
+            
+            // Mettre à jour le graphique
+            if (prayerChart) {
+                prayerChart.data.datasets[0].label = translations[lang].homePrayers;
+                prayerChart.data.datasets[1].label = translations[lang].mosquePrayers;
+                prayerChart.options.scales.y.title.text = translations[lang].prayersAccomplished;
+                prayerChart.update();
+            }
         }
 
         // Ouvrir le modal pour sélectionner le lieu de prière
@@ -1286,6 +1506,11 @@
                     });
                     document.getElementById(tabId).classList.add('active');
                 });
+            });
+            
+            // Sélecteur de langue
+            document.getElementById('language-selector').addEventListener('change', function() {
+                applyLanguage(this.value);
             });
             
             // Menu mobile
