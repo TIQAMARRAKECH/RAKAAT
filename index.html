@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ركعات - Suivi de Prières</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Variables CSS pour les thèmes */
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #d4af37;
+            --background-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --text-light: #666666;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-theme {
+            --primary-color: #4caf50;
+            --secondary-color: #ffd54f;
+            --background-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-light: #aaaaaa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .gold-theme {
+            --primary-color: #b8860b;
+            --secondary-color: #daa520;
+            --background-color: #fef9e7;
+            --card-color: #fffdf0;
+            --text-color: #5d4037;
+            --text-light: #8d6e63;
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        main {
+            padding: 30px 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        /* Cartes */
+        .card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Section des prières */
+        .prayer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .prayer-card {
+            background: linear-gradient(135deg, var(--primary-color), #1b5e20);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prayer-card.prayed {
+            background: linear-gradient(135deg, var(--secondary-color), #b8860b);
+        }
+
+        .prayer-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .prayer-time {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .prayer-status {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+
+        .prayer-status.prayed {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .prayer-action {
+            margin-top: 15px;
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .prayer-action:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Personnage virtuel */
+        .character-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .character {
+            width: 120px;
+            height: 120px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .character-message {
+            background-color: var(--card-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-style: italic;
+            position: relative;
+        }
+
+        .character-message:after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid var(--card-color);
+        }
+
+        /* Statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Onglets */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Formulaire et paramètres */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            background-color: var(--card-color);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .theme-option {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary-color);
+        }
+
+        .theme-light {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .theme-dark {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .theme-gold {
+            background-color: #fef9e7;
+            color: #5d4037;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        /* Graphiques */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .chart-filter {
+            padding: 8px 15px;
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chart-filter.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .location-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .location-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .location-option.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .location-option i {
+            margin-right: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: var(--primary-color);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            
+            nav ul.show {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .prayer-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .chart-filters {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* RTL Support */
+        [dir="rtl"] {
+            text-align: right;
+        }
+
+        [dir="rtl"] .character-message:after {
+            left: auto;
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        /* Indicateur de lieu de prière */
+        .prayer-location {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .prayer-location i {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-mosque"></i>
+                    <span>ركعات</span>
+                </div>
+                <nav>
+                    <button class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul>
+                        <li><a href="#" class="active" data-tab="dashboard">Tableau de bord</a></li>
+                        <li><a href="#" data-tab="prayers">Prières</a></li>
+                        <li><a href="#" data-tab="statistics">Statistiques</a></li>
+                        <li><a href="#" data-tab="fasting">Jeûne</a></li>
+                        <li><a href="#" data-tab="quran">Coran</a></li>
+                        <li><a href="#" data-tab="dhikr">Dhikr</a></li>
+                        <li><a href="#" data-tab="settings">Paramètres</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-grid">
+            <div class="main-content">
+                <div class="tabs">
+                    <div class="tab active" data-tab="dashboard">Tableau de bord</div>
+                    <div class="tab" data-tab="prayers">Prières</div>
+                    <div class="tab" data-tab="statistics">Statistiques</div>
+                    <div class="tab" data-tab="fasting">Jeûne</div>
+                    <div class="tab" data-tab="quran">Coran</div>
+                    <div class="tab" data-tab="dhikr">Dhikr</div>
+                    <div class="tab" data-tab="settings">Paramètres</div>
+                </div>
+
+                <!-- Tableau de bord -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Aujourd'hui</h2>
+                            <div id="current-date">
+                                <span id="gregorian-date">15 Octobre 2023</span> | 
+                                <span id="hijri-date">30 Rabi' al-Awwal 1445</span>
+                            </div>
+                        </div>
+                        <div class="prayer-grid">
+                            <!-- Les cartes de prières seront générées par JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Statistiques de la semaine</h2>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="prayer-count">0/5</div>
+                                <div class="stat-label">Prières aujourd'hui</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="fasting-count">0</div>
+                                <div class="stat-label">Jours de jeûne</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="quran-progress">0%</div>
+                                <div class="stat-label">Progression Coran</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="dhikr-count">0</div>
+                                <div class="stat-label">Dhikr aujourd'hui</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Prières -->
+                <div id="prayers" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Historique des prières</h2>
+                        </div>
+                        <div id="prayer-history">
+                            <!-- L'historique sera généré par JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Statistiques -->
+                <div id="statistics" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Statistiques des prières</h2>
+                        </div>
+                        <div class="chart-filters">
+                            <button class="chart-filter active" data-period="week">Semaine</button>
+                            <button class="chart-filter" data-period="month">Mois</button>
+                            <button class="chart-filter" data-period="year">Année</button>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="prayerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Jeûne -->
+                <div id="fasting" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Suivi du jeûne</h2>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="fasting-today">Non</div>
+                                <div class="stat-label">Jeûne aujourd'hui</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="fasting-total">0</div>
+                                <div class="stat-label">Jours jeûnés ce mois</div>
+                            </div>
+                        </div>
+                        <div id="fasting-calendar">
+                            <!-- Le calendrier de jeûne sera généré par JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Coran -->
+                <div id="quran" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Progression de lecture</h2>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="quran-progress-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-text" id="quran-progress-text">0/604 pages</div>
+                        </div>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label class="form-label">Ajouter des pages lues aujourd'hui</label>
+                            <input type="number" id="pages-read" class="form-control" min="0" max="20" value="0">
+                            <button class="btn btn-primary" id="add-pages" style="margin-top: 10px;">Ajouter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Dhikr -->
+                <div id="dhikr" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Dhikr du jour</h2>
+                        </div>
+                        <div id="dhikr-list">
+                            <!-- La liste des dhikr sera générée par JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Paramètres -->
+                <div id="settings" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Paramètres de l'application</h2>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Thème</label>
+                            <div class="theme-options">
+                                <div class="theme-option theme-light active" data-theme="light">
+                                    <i class="fas fa-sun"></i>
+                                    <div>Clair</div>
+                                </div>
+                                <div class="theme-option theme-dark" data-theme="dark">
+                                    <i class="fas fa-moon"></i>
+                                    <div>Sombre</div>
+                                </div>
+                                <div class="theme-option theme-gold" data-theme="gold">
+                                    <i class="fas fa-star"></i>
+                                    <div>Or</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notifications</label>
+                            <div>
+                                <input type="checkbox" id="prayer-notifications" checked>
+                                <label for="prayer-notifications">Rappels de prières</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="fasting-notifications">
+                                <label for="fasting-notifications">Rappels de jeûne</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Localisation</label>
+                            <input type="text" id="location" class="form-control" placeholder="Ville, Pays">
+                            <button class="btn btn-primary" id="save-location" style="margin-top: 10px;">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <div class="character-container">
+                        <div class="character">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="character-message" id="character-message">
+                            Bonjour! N'oubliez pas vos prières aujourd'hui.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Prochaines prières</h2>
+                    </div>
+                    <div id="next-prayers">
+                        <!-- Les prochaines prières seront générées par JavaScript -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Objectifs du jour</h2>
+                    </div>
+                    <div id="daily-goals">
+                        <!-- Les objectifs seront générés par JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal pour sélectionner le lieu de prière -->
+    <div class="modal" id="location-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Où avez-vous prié ?</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="location-options">
+                <button class="location-option" data-location="mosque">
+                    <i class="fas fa-mosque"></i>
+                    <span>À la mosquée</span>
+                </button>
+                <button class="location-option" data-location="home">
+                    <i class="fas fa-home"></i>
+                    <span>À la maison</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 ركعات - Application de suivi des prières. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Données de l'application
+        const appData = {
+            prayers: [
+                { id: 1, name: "Fajr", time: "05:30", prayed: false, location: null },
+                { id: 2, name: "Dhuhr", time: "12:30", prayed: false, location: null },
+                { id: 3, name: "Asr", time: "15:45", prayed: false, location: null },
+                { id: 4, name: "Maghrib", time: "18:20", prayed: false, location: null },
+                { id: 5, name: "Isha", time: "19:45", prayed: false, location: null }
+            ],
+            fasting: {
+                today: false,
+                total: 0,
+                calendar: []
+            },
+            quran: {
+                pagesRead: 0,
+                totalPages: 604,
+                progress: 0
+            },
+            dhikr: [
+                { id: 1, name: "Subhanallah", target: 33, count: 0 },
+                { id: 2, name: "Alhamdulillah", target: 33, count: 0 },
+                { id: 3, name: "Allahu Akbar", target: 34, count: 0 }
+            ],
+            settings: {
+                theme: "light",
+                notifications: {
+                    prayer: true,
+                    fasting: false
+                },
+                location: "Paris, France"
+            },
+            statistics: {
+                week: [5, 4, 5, 3, 5, 4, 5],
+                month: Array(30).fill(0).map(() => Math.floor(Math.random() * 6)),
+                year: Array(12).fill(0).map(() => Math.floor(Math.random() * 150) + 50)
+            }
+        };
+
+        // Variables globales
+        let currentPrayerId = null;
+        let prayerChart = null;
+
+        // Initialisation de l'application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            initializeUI();
+            setupEventListeners();
+            updateUI();
+        });
+
+        // Charger les données depuis le localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('rakatAppData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                Object.assign(appData, parsedData);
+            }
+        }
+
+        // Sauvegarder les données dans le localStorage
+        function saveData() {
+            localStorage.setItem('rakatAppData', JSON.stringify(appData));
+        }
+
+        // Initialiser l'interface utilisateur
+        function initializeUI() {
+            // Mettre à jour la date
+            updateDate();
+            
+            // Générer les cartes de prières
+            generatePrayerCards();
+            
+            // Générer l'historique des prières
+            generatePrayerHistory();
+            
+            // Générer les prochaines prières
+            generateNextPrayers();
+            
+            // Générer les objectifs du jour
+            generateDailyGoals();
+            
+            // Générer la liste des dhikr
+            generateDhikrList();
+            
+            // Initialiser le graphique
+            initializeChart();
+            
+            // Appliquer le thème sauvegardé
+            applyTheme(appData.settings.theme);
+        }
+
+        // Mettre à jour l'interface utilisateur
+        function updateUI() {
+            // Mettre à jour le compteur de prières
+            const prayedCount = appData.prayers.filter(p => p.prayed).length;
+            document.getElementById('prayer-count').textContent = `${prayedCount}/5`;
+            
+            // Mettre à jour le compteur de jeûne
+            document.getElementById('fasting-count').textContent = appData.fasting.total;
+            document.getElementById('fasting-today').textContent = appData.fasting.today ? "Oui" : "Non";
+            document.getElementById('fasting-total').textContent = appData.fasting.total;
+            
+            // Mettre à jour la progression du Coran
+            const quranProgress = Math.round((appData.quran.pagesRead / appData.quran.totalPages) * 100);
+            document.getElementById('quran-progress').textContent = `${quranProgress}%`;
+            document.getElementById('quran-progress-bar').style.width = `${quranProgress}%`;
+            document.getElementById('quran-progress-text').textContent = `${appData.quran.pagesRead}/${appData.quran.totalPages} pages`;
+            
+            // Mettre à jour le compteur de dhikr
+            const dhikrCount = appData.dhikr.reduce((total, d) => total + d.count, 0);
+            document.getElementById('dhikr-count').textContent = dhikrCount;
+            
+            // Mettre à jour le message du personnage
+            updateCharacterMessage();
+        }
+
+        // Mettre à jour la date
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('gregorian-date').textContent = now.toLocaleDateString('fr-FR', options);
+            
+            // Conversion simplifiée en date hijri (à remplacer par une vraie conversion)
+            const hijriDate = calculateHijriDate(now);
+            document.getElementById('hijri-date').textContent = hijriDate;
+        }
+
+        // Calcul simplifié de la date hijri
+        function calculateHijriDate(date) {
+            // Ceci est une approximation simplifiée
+            const hijriOffset = -579; // Différence approximative en jours
+            const startHijri = new Date(622, 6, 16); // Début du calendrier hijri
+            
+            const diffTime = date - startHijri;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + hijriOffset;
+            
+            const hijriYear = Math.floor(diffDays / 354.367);
+            const remainingDays = diffDays % 354.367;
+            
+            const hijriMonths = [
+                "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani", 
+                "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban", 
+                "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+            ];
+            
+            let monthIndex = 0;
+            let dayCount = 0;
+            const monthDays = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
+            
+            for (let i = 0; i < monthDays.length; i++) {
+                dayCount += monthDays[i];
+                if (remainingDays < dayCount) {
+                    monthIndex = i;
+                    break;
+                }
+            }
+            
+            const day = Math.floor(remainingDays - (dayCount - monthDays[monthIndex])) + 1;
+            const year = hijriYear + 1;
+            
+            return `${day} ${hijriMonths[monthIndex]} ${year}`;
+        }
+
+        // Générer les cartes de prières
+        function generatePrayerCards() {
+            const prayerGrid = document.querySelector('.prayer-grid');
+            prayerGrid.innerHTML = '';
+            
+            appData.prayers.forEach(prayer => {
+                const card = document.createElement('div');
+                card.className = `prayer-card ${prayer.prayed ? 'prayed' : ''}`;
+                
+                let locationHtml = '';
+                if (prayer.prayed && prayer.location) {
+                    const locationIcon = prayer.location === 'mosque' ? 'fa-mosque' : 'fa-home';
+                    const locationText = prayer.location === 'mosque' ? 'Mosquée' : 'Maison';
+                    locationHtml = `
+                        <div class="prayer-location">
+                            <i class="fas ${locationIcon}"></i>
+                            <span>${locationText}</span>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="prayer-name">${prayer.name}</div>
+                    <div class="prayer-time">${prayer.time}</div>
+                    <div class="prayer-status ${prayer.prayed ? 'prayed' : ''}">
+                        ${prayer.prayed ? 'Accomplie' : 'En attente'}
+                    </div>
+                    ${locationHtml}
+                    <button class="prayer-action" data-prayer-id="${prayer.id}">
+                        ${prayer.prayed ? 'Annuler' : 'Marquer'}
+                    </button>
+                `;
+                prayerGrid.appendChild(card);
+            });
+        }
+
+        // Générer l'historique des prières
+        function generatePrayerHistory() {
+            const historyContainer = document.getElementById('prayer-history');
+            historyContainer.innerHTML = '<p>Historique des 7 derniers jours</p>';
+            
+            // Simulation d'historique (dans une vraie app, ces données viendraient du stockage)
+            const historyData = [
+                { date: '14/10/2023', prayers: [true, true, true, true, true] },
+                { date: '13/10/2023', prayers: [true, true, true, false, true] },
+                { date: '12/10/2023', prayers: [true, true, false, true, true] },
+                { date: '11/10/2023', prayers: [true, true, true, true, true] },
+                { date: '10/10/2023', prayers: [true, false, true, true, true] },
+                { date: '09/10/2023', prayers: [true, true, true, true, false] },
+                { date: '08/10/2023', prayers: [true, true, true, true, true] }
+            ];
+            
+            historyData.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'history-day';
+                dayElement.innerHTML = `
+                    <div>${day.date}</div>
+                    <div>${day.prayers.filter(p => p).length}/5 prières</div>
+                `;
+                historyContainer.appendChild(dayElement);
+            });
+        }
+
+        // Générer les prochaines prières
+        function generateNextPrayers() {
+            const nextPrayersContainer = document.getElementById('next-prayers');
+            nextPrayersContainer.innerHTML = '';
+            
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            // Trouver la prochaine prière
+            let nextPrayer = null;
+            for (const prayer of appData.prayers) {
+                const [hours, minutes] = prayer.time.split(':').map(Number);
+                const prayerTime = hours * 60 + minutes;
+                
+                if (prayerTime > currentTime && !prayer.prayed) {
+                    nextPrayer = prayer;
+                    break;
+                }
+            }
+            
+            // Si aucune prière n'est trouvée, prendre la première du lendemain
+            if (!nextPrayer) {
+                nextPrayer = appData.prayers[0];
+            }
+            
+            const nextElement = document.createElement('div');
+            nextElement.className = 'next-prayer';
+            nextElement.innerHTML = `
+                <div><strong>${nextPrayer.name}</strong></div>
+                <div>${nextPrayer.time}</div>
+            `;
+            nextPrayersContainer.appendChild(nextElement);
+        }
+
+        // Générer les objectifs du jour
+        function generateDailyGoals() {
+            const goalsContainer = document.getElementById('daily-goals');
+            goalsContainer.innerHTML = '';
+            
+            const goals = [
+                { name: '5 prières', completed: appData.prayers.filter(p => p.prayed).length === 5 },
+                { name: 'Lecture du Coran', completed: appData.quran.pagesRead > 0 },
+                { name: 'Dhikr', completed: appData.dhikr.some(d => d.count > 0) },
+                { name: 'Jeûne surérogatoire', completed: appData.fasting.today }
+            ];
+            
+            goals.forEach(goal => {
+                const goalElement = document.createElement('div');
+                goalElement.className = 'daily-goal';
+                goalElement.innerHTML = `
+                    <i class="fas ${goal.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
+                    <span>${goal.name}</span>
+                `;
+                goalsContainer.appendChild(goalElement);
+            });
+        }
+
+        // Générer la liste des dhikr
+        function generateDhikrList() {
+            const dhikrContainer = document.getElementById('dhikr-list');
+            dhikrContainer.innerHTML = '';
+            
+            appData.dhikr.forEach(dhikr => {
+                const dhikrElement = document.createElement('div');
+                dhikrElement.className = 'dhikr-item';
+                dhikrElement.innerHTML = `
+                    <div class="dhikr-name">${dhikr.name}</div>
+                    <div class="dhikr-counter">
+                        <button class="dhikr-decrease" data-dhikr-id="${dhikr.id}">-</button>
+                        <span>${dhikr.count}/${dhikr.target}</span>
+                        <button class="dhikr-increase" data-dhikr-id="${dhikr.id}">+</button>
+                    </div>
+                `;
+                dhikrContainer.appendChild(dhikrElement);
+            });
+        }
+
+        // Initialiser le graphique des statistiques
+        function initializeChart() {
+            const ctx = document.getElementById('prayerChart').getContext('2d');
+            
+            // Données par défaut (semaine)
+            const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+            const data = appData.statistics.week;
+            
+            prayerChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Prières accomplies',
+                        data: data,
+                        borderColor: '#2e7d32',
+                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mettre à jour le graphique selon la période sélectionnée
+        function updateChart(period) {
+            let labels, data, max;
+            
+            switch(period) {
+                case 'week':
+                    labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+                    data = appData.statistics.week;
+                    max = 5;
+                    break;
+                case 'month':
+                    labels = Array(30).fill(0).map((_, i) => i + 1);
+                    data = appData.statistics.month;
+                    max = 5;
+                    break;
+                case 'year':
+                    labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    data = appData.statistics.year;
+                    max = null;
+                    break;
+            }
+            
+            prayerChart.data.labels = labels;
+            prayerChart.data.datasets[0].data = data;
+            prayerChart.options.scales.y.max = max;
+            prayerChart.update();
+        }
+
+        // Mettre à jour le message du personnage
+        function updateCharacterMessage() {
+            const messageElement = document.getElementById('character-message');
+            const prayedCount = appData.prayers.filter(p => p.prayed).length;
+            
+            let message = '';
+            if (prayedCount === 0) {
+                message = "N'oubliez pas vos prières aujourd'hui!";
+            } else if (prayedCount < 3) {
+                message = "Continuez vos efforts!";
+            } else if (prayedCount < 5) {
+                message = "Vous êtes sur la bonne voie!";
+            } else {
+                message = "Félicitations! Vous avez accompli toutes vos prières aujourd'hui!";
+            }
+            
+            messageElement.textContent = message;
+        }
+
+        // Appliquer le thème
+        function applyTheme(theme) {
+            document.body.className = '';
+            if (theme !== 'light') {
+                document.body.classList.add(`${theme}-theme`);
+            }
+            
+            // Mettre à jour l'interface des options de thème
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === theme) {
+                    option.classList.add('active');
+                }
+            });
+        }
+
+        // Ouvrir le modal pour sélectionner le lieu de prière
+        function openLocationModal(prayerId) {
+            currentPrayerId = prayerId;
+            document.getElementById('location-modal').style.display = 'flex';
+        }
+
+        // Fermer le modal
+        function closeLocationModal() {
+            document.getElementById('location-modal').style.display = 'none';
+            currentPrayerId = null;
+        }
+
+        // Configurer les écouteurs d'événements
+        function setupEventListeners() {
+            // Navigation par onglets
+            document.querySelectorAll('.tab, nav a').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tabId = this.dataset.tab;
+                    
+                    // Mettre à jour les onglets actifs
+                    document.querySelectorAll('.tab, nav a').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Afficher le contenu de l'onglet
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Menu mobile
+            document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+                document.querySelector('nav ul').classList.toggle('show');
+            });
+            
+            // Actions de prière
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('prayer-action')) {
+                    const prayerId = parseInt(e.target.dataset.prayerId);
+                    const prayer = appData.prayers.find(p => p.id === prayerId);
+                    
+                    if (prayer) {
+                        if (!prayer.prayed) {
+                            // Si la prière n'est pas encore marquée, ouvrir le modal pour choisir le lieu
+                            openLocationModal(prayerId);
+                        } else {
+                            // Si la prière est déjà marquée, l'annuler
+                            prayer.prayed = false;
+                            prayer.location = null;
+                            saveData();
+                            generatePrayerCards();
+                            updateUI();
+                        }
+                    }
+                }
+            });
+            
+            // Sélection du lieu de prière
+            document.querySelectorAll('.location-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const location = this.dataset.location;
+                    const prayer = appData.prayers.find(p => p.id === currentPrayerId);
+                    
+                    if (prayer) {
+                        prayer.prayed = true;
+                        prayer.location = location;
+                        saveData();
+                        generatePrayerCards();
+                        updateUI();
+                        closeLocationModal();
+                    }
+                });
+            });
+            
+            // Fermer le modal
+            document.querySelector('.close-modal').addEventListener('click', closeLocationModal);
+            
+            // Fermer le modal en cliquant à l'extérieur
+            document.getElementById('location-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeLocationModal();
+                }
+            });
+            
+            // Filtres du graphique
+            document.querySelectorAll('.chart-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('.chart-filter').forEach(f => {
+                        f.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const period = this.dataset.period;
+                    updateChart(period);
+                });
+            });
+            
+            // Actions de dhikr
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('dhikr-increase')) {
+                    const dhikrId = parseInt(e.target.dataset.dhikrId);
+                    const dhikr = appData.dhikr.find(d => d.id === dhikrId);
+                    
+                    if (dhikr && dhikr.count < dhikr.target) {
+                        dhikr.count++;
+                        saveData();
+                        generateDhikrList();
+                        updateUI();
+                    }
+                }
+                
+                if (e.target.classList.contains('dhikr-decrease')) {
+                    const dhikrId = parseInt(e.target.dataset.dhikrId);
+                    const dhikr = appData.dhikr.find(d => d.id === dhikrId);
+                    
+                    if (dhikr && dhikr.count > 0) {
+                        dhikr.count--;
+                        saveData();
+                        generateDhikrList();
+                        updateUI();
+                    }
+                }
+            });
+            
+            // Ajout de pages de Coran
+            document.getElementById('add-pages').addEventListener('click', function() {
+                const pagesInput = document.getElementById('pages-read');
+                const pages = parseInt(pagesInput.value) || 0;
+                
+                if (pages > 0) {
+                    appData.quran.pagesRead += pages;
+                    if (appData.quran.pagesRead > appData.quran.totalPages) {
+                        appData.quran.pagesRead = appData.quran.totalPages;
+                    }
+                    
+                    saveData();
+                    updateUI();
+                    pagesInput.value = 0;
+                }
+            });
+            
+            // Sélection de thème
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    appData.settings.theme = theme;
+                    saveData();
+                    applyTheme(theme);
+                });
+            });
+            
+            // Sauvegarde de la localisation
+            document.getElementById('save-location').addEventListener('click', function() {
+                const locationInput = document.getElementById('location');
+                appData.settings.location = locationInput.value || "Paris, France";
+                saveData();
+                alert('Localisation enregistrée: ' + appData.settings.location);
+            });
+            
+            // Gestion du jeûne
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'fasting-today') {
+                    appData.fasting.today = !appData.fasting.today;
+                    if (appData.fasting.today) {
+                        appData.fasting.total++;
+                    } else {
+                        appData.fasting.total = Math.max(0, appData.fasting.total - 1);
+                    }
+                    saveData();
+                    updateUI();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
